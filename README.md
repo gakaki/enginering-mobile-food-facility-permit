@@ -1,7 +1,7 @@
 ## enginering-mobile-food-facility-permit
 
 
-<img src="images/main.png" width=50% height=10%>
+<img src="main.png" width=50% height=10%>
 
 
 ### Docker Compose
