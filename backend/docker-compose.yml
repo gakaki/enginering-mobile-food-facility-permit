@@ -1,0 +1,44 @@
+services:
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/config/mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+      - ./data/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      TZ: 'Asia/Shanghai'
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongo:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+
+  redis:
+    image: 'redis/redis-stack:latest'
+    restart: always
+    environment:
+      REDIS_ARGS: "--requirepass root"
+    ports:
+      - "6379:6379"#redis-server
+      - "8001:8001" #RedisInsight
+#    command: /bin/sh -c "redis-server --requirepass $$REDIS_HOST_PASSWORD"
+    volumes:
+      - ./data/redis:/data
+
+  meilisearch:
+    image: 'getmeili/meilisearch:latest'
+    restart: always
+    environment:
+      MEILI_ENV: "development"
+      MEILI_HTTP_ADDR: 0.0.0.0:7700
+    ports:
+      - "7700:7700"
+    volumes:
+      - ./data/meili_data:/meili_data

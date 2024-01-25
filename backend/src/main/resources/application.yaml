@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: springboot-redisson
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          password: root
+          address: "redis://127.0.0.1:6379"
+          database: 0
+        threads: 0
+        nettyThreads: 0
+        transportMode: "NIO"
+
+#        codec: !<org.redisson.codec.FstCodec> {}
+server:
+  port: 9888
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json
+    min-response-size: 1024

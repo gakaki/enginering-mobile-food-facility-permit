@@ -1,0 +1,17 @@
+.DS_Store
+tmp
+target
+opentelmenty.md
+data
+data/config
+data/meili_data
+data/mongo
+data/mysql
+data/redis
+
+.idea
+CLIFoodTrucksFinder
+node_modules
+dist
+pnpm-lock.yaml
+target
