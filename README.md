@@ -1,6 +1,6 @@
 ## enginering-mobile-food-facility-permit
 
-<video src="https://midu.studio515.cn/resume/food_trucks_geo.mp4" width=100% height=50% />
+[Short Video](https://midu.studio515.cn/resume/food_trucks_geo.mp4)
 <img src="main.png" width=70% height=40%>
 
 
