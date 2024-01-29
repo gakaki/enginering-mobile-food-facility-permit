@@ -16,3 +16,6 @@ dist
 pnpm-lock.yaml
 target
 Cargo.lock
+.idea
+target
+*.csv
