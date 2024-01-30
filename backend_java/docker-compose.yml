@@ -1,14 +1,26 @@
 services:
+  qdrant:
+    image: qdrant/qdrant:v1.3.0
+    restart: on-failure
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+      -
+  baseimage:
+    platform: linux/x86_64
+    build:
+      context: .
+      dockerfile: DockerfileBellSoftGraalVM
+    image: baseimage:0.0.1
 
   app:
     platform: linux/x86_64
+    depends_on:
+      - baseimage
     build:
-#      progress: plain
       context: .
-      dockerfile: DockerfileBellSoftGraal
-    image: myjava:0.0.1
-    ports:
-      - "8080:8080"
+      dockerfile: DockerfileBuildNative
+    image: app:0.0.1
 
   mysql:
     image: mysql:8.3.0-oraclelinux8

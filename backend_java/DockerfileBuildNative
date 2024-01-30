@@ -1,0 +1,30 @@
+FROM baseimage:0.0.1
+
+#ENV USER=app
+#ENV UID=10001
+#
+#RUN adduser \
+#    --disabled-password \
+#    --gecos "" \
+#    --home "/nonexistent" \
+#    --shell "/sbin/nologin" \
+#    --no-create-home \
+#    --uid "${UID}" \
+#    "${USER}"
+#COPY --from=builder2 /etc/passwd /etc/passwd
+#COPY --from=builder2 /etc/group /etc/group
+WORKDIR /app
+COPY . .
+#RUN  mvn -Pnative native:compile
+RUN ulimit -c unlimited
+RUN mvn -DskipTests -Dmaven.test.skip=true -Pnative native:compile
+EXPOSE 8080
+
+COPY /app/* ./
+CMD ["/bin/sh"]
+#COPY /app/target/java ./
+#COPY /app/build/native/nativeCompile/java ./
+
+#RUN ls /app
+##USER app:app
+CMD ["/app/java"]

@@ -1,6 +1,8 @@
 spring:
   application:
     name: springboot-redisson
+  elasticsearch:
+    uris: http://localhost:9200
   redis:
     redisson:
       config: |

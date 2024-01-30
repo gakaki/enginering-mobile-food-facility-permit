@@ -1,0 +1,31 @@
+FROM alpine:latest
+# 华为maven镜像地址 https://repo.huaweicloud.com/apache/maven/maven-3/3.9.6/binaries/
+# bellsoft 的jdk 和 graavl 号称是速度最快的container
+RUN set -eux && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+RUN apk --no-cache add libgcc bash curl git zip g++ make zlib-static openssl-dev libgfortran
+ENV TZ=Asia/Shanghai
+ENV NIK_HOME=/opt/java
+ENV MAVEN_HOME=/opt/maven
+RUN mkdir -p ${NIK_HOME} ${MAVEN_HOME}
+ENV PATH=${PATH}:${MAVEN_HOME}/bin:${NIK_HOME}/bin
+
+## install maven
+RUN cd ${MAVEN_HOME} && \
+    wget https://repo.huaweicloud.com/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.zip -O maven.zip \
+    && unzip maven.zip && mv *maven*/* .
+## install graavl vm sdk
+RUN cd ${NIK_HOME} && \
+    wget https://download.bell-sw.com/vm/23.1.2/bellsoft-liberica-vm-openjdk21.0.2+14-23.1.2+1-linux-x64-musl.tar.gz -O nik.tar.gz \
+    && tar zxvf nik.tar.gz && mv bellsoft*/* .
+CMD ["/bin/sh"]
+#EXPOSE 8080
+#WORKDIR /app
+#COPY . .
+#RUN mvn -DskipTests -Dmaven.test.skip=true -Pnative native:compile
+#COPY /app/build/native/nativeCompile/java ./
+#CMD ["/app/java"]
+
+# 299mb
+
+
+

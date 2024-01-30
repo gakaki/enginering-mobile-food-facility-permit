@@ -5,9 +5,15 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 import org.nustaq.serialization.annotations.Serialize;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Setting;
 
 @Data
-@Jacksonized
+@Document(indexName = "foodTrucks",createIndex = true)
+@Setting(shards = 1, replicas = 1,refreshInterval="1ms")
 //和easy excel 不能一起加 不然会出现数据遗漏的问题
 //@NoArgsConstructor
 //@AllArgsConstructor
@@ -18,9 +24,12 @@ public class FoodTruckEntity {
     private Double distanceRedis;
 
     // 位置编号
+    @Id
     @ExcelProperty(value = "locationid")
     private String locationid;
+
     // 申请人
+    @Field(type = FieldType.Keyword)
     @ExcelProperty(value = "Applicant")
     private String Applicant;
     // 设施类型
