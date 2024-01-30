@@ -1,0 +1,9 @@
+data
+doc
+sql
+target
+ui
+.dockerignore
+.env
+meilisearch-react-demo
+meilisearch-react-demo/*.*

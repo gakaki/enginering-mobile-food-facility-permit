@@ -1,10 +1,21 @@
 services:
+
+  app:
+    platform: linux/x86_64
+    build:
+#      progress: plain
+      context: .
+      dockerfile: DockerfileBellSoftGraal
+    image: myjava:0.0.1
+    ports:
+      - "8080:8080"
+
   mysql:
-    image: mysql:latest
+    image: mysql:8.3.0-oraclelinux8
     ports:
       - "3306:3306"
     volumes:
-      - ./data/config/mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+      - ./config/mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
       - ./data/mysql:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: "root"
@@ -28,7 +39,7 @@ services:
     ports:
       - "6379:6379"#redis-server
       - "8001:8001" #RedisInsight
-#    command: /bin/sh -c "redis-server --requirepass $$REDIS_HOST_PASSWORD"
+    #    command: /bin/sh -c "redis-server --requirepass $$REDIS_HOST_PASSWORD"
     volumes:
       - ./data/redis:/data
 
@@ -42,3 +53,46 @@ services:
       - "7700:7700"
     volumes:
       - ./data/meili_data:/meili_data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: elasticsearch
+    privileged: true
+    restart: always
+    environment:
+      - "cluster.name=elasticsearch" #设置集群名称为elasticsearch
+      - "discovery.type=single-node" #以单一节点模式启动
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m" #设置使用jvm内存大小
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    volumes:
+      - ./data/elasticsearch/plugins:/usr/local/dockercompose/elasticsearch/plugins #插件文件挂载
+      - ./data/elasticsearch/data:/usr/local/dockercompose/elasticsearch/data:rw #数据文件挂载
+      - ./data/elasticsearch/logs:/usr/local/dockercompose/elasticsearch/logs:rw
+    ports:
+      - 9200:9200
+      - 9300:9300
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1050M
+        reservations:
+          memory: 512M
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: kibana
+    depends_on:
+      - elasticsearch #kibana在elasticsearch启动之后再启动
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200 #设置访问elasticsearch的地址
+      I18N_LOCALE: zh-CN
+    ports:
+      - 5601:5601
