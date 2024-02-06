@@ -19,3 +19,4 @@ Cargo.lock
 .idea
 target
 *.csv
+/spring-data-examples

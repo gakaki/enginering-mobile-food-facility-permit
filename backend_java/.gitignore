@@ -33,3 +33,6 @@ build/
 .vscode/
 target
 meilisearch-react-demo
+
+
+todo.md

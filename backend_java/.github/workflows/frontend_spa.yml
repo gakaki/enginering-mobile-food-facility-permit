@@ -1,0 +1,102 @@
+# https://developer.okta.com/blog/2022/04/22/github-actions-graalvm
+name: Native CI
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+permissions:
+  contents: read
+jobs:
+  pipeline:
+    name: flickr2 native pipeline
+    runs-on: ${{ matrix.os }}
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.pull_request.title, '[skip ci]') && !contains(github.event.pull_request.title, '[ci skip]')"
+    timeout-minutes: 90
+    env:
+      SPRING_OUTPUT_ANSI_ENABLED: DETECT
+      SPRING_JPA_SHOW_SQL: false
+      JHI_DISABLE_WEBPACK_LOGS: true
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-2019]
+        graalvm-version: ['22.0.0.2']
+        java-version: ['11']
+        include:
+          - os: ubuntu-latest
+            executable-suffix: ''
+            native-build-args: --verbose -J-Xmx10g
+          - os: macos-latest
+            executable-suffix: ''
+            native-build-args: --verbose -J-Xmx13g
+          - os: windows-2019
+            executable-suffix: '.exe'
+            # e2e is disabled due to unstable docker step
+            e2e: false
+            native-build-args: --verbose -J-Xmx10g
+    steps:
+      # OS customizations that allow the builds to succeed on Linux and Windows.
+      # Using hash for better security due to third party actions.
+      - name: Set up swap space
+        if: runner.os == 'Linux'
+        # v1.0 (49819abfb41bd9b44fb781159c033dba90353a7c)
+        uses: pierotofy/set-swap-space@49819abfb41bd9b44fb781159c033dba90353a7c
+        with:
+          swap-size-gb: 10
+      - name:
+          Configure pagefile
+        # v1.2 (7e234852c937eea04d6ee627c599fb24a5bfffee)
+        uses: al-cheb/configure-pagefile-action@7e234852c937eea04d6ee627c599fb24a5bfffee
+        if: runner.os == 'Windows'
+        with:
+          minimum-size: 10GB
+          maximum-size: 12GB
+      - name: Set up pagefile
+        if: runner.os == 'Windows'
+        run: |
+          (Get-CimInstance Win32_PageFileUsage).AllocatedBaseSize
+        shell: pwsh
+      - name: 'SETUP: docker'
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install --cask docker
+          sudo /Applications/Docker.app/Contents/MacOS/Docker --unattended --install-privileged-components
+          open -a /Applications/Docker.app --args --unattended --accept-license
+          #echo "We are waiting for Docker to be up and running. It can take over 2 minutes..."
+          #while ! /Applications/Docker.app/Contents/Resources/bin/docker info &>/dev/null; do sleep 1; done
+        if: runner.os == 'macOS'
+
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.14.0
+      - name: Set up GraalVM (Java ${{ matrix.java-version }})
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: '${{ matrix.graalvm-version }}'
+          java-version: '${{ matrix.java-version }}'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+      - name: Install node.js packages
+        run: npm install
+      - name: 'E2E: Package'
+        run: npm run native-package -- -B -ntp "-Dnative-build-args=${{ matrix.native-build-args }}"
+      - name: 'E2E: Prepare'
+        if: matrix.e2e != false
+        run: npm run ci:e2e:prepare
+      - name: 'E2E: Run'
+        if: matrix.e2e != false
+        run: npm run native-e2e
