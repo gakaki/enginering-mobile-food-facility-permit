@@ -1,42 +1,42 @@
 # https://docs.docker.com/compose/compose-file/compose-file-v3/
 # docker-compose build --no-cache --progress=plain app
 services:
-#  base:
-#    platform: linux/x86_64
-#    image: gakaki/base
-##    restart: on-failure
-#    container_name: base
-#    environment:
-#      TZ: Asia/Shanghai
-#    build:
-#      context: .
-#      dockerfile: DockerfileUbuntuBase
-#      args:
-#        progress: plain
-##    entrypoint: [ "/bin/sh","-c" ]
-#    tty: true
-#    stdin_open: true
-##    command:
-##      - |
-##        echo a
-##        echo b
-##        echo c
-#
-##  docker-compose build --no-cache base
-##  docker-compose up -d base
-##  docker-compose exec base bash
-#
-#  python:
-#    platform: linux/x86_64
-#    image: gakaki/python
-#    container_name: python
-#    build:
-#      context: .
-#      dockerfile: DockerfilePythonBase
-#      args:
-#        progress: plain
-#    tty: true
-#    stdin_open: true
+  base:
+    platform: linux/x86_64
+    image: gakaki/base
+#    restart: on-failure
+    container_name: base
+    environment:
+      TZ: Asia/Shanghai
+    build:
+      context: .
+      dockerfile: DockerfileUbuntuBase
+      args:
+        progress: plain
+#    entrypoint: [ "/bin/sh","-c" ]
+    tty: true
+    stdin_open: true
+#    command:
+#      - |
+#        echo a
+#        echo b
+#        echo c
+
+#  docker-compose build --no-cache base
+#  docker-compose up -d base
+#  docker-compose exec base bash
+
+  python:
+    platform: linux/x86_64
+    image: gakaki/python
+    container_name: python
+    build:
+      context: .
+      dockerfile: DockerfilePythonBase
+      args:
+        progress: plain
+    tty: true
+    stdin_open: true
 
   qdrant:
     image: qdrant/qdrant:v1.3.0
@@ -114,6 +114,7 @@ services:
     privileged: true
     restart: always
     environment:
+      - xpack.security.enrollment.enabled=false
       - "cluster.name=elasticsearch" #设置集群名称为elasticsearch
       - "discovery.type=single-node" #以单一节点模式启动
       - "ES_JAVA_OPTS=-Xms512m -Xmx1024m" #设置使用jvm内存大小
@@ -146,6 +147,7 @@ services:
     depends_on:
       - elasticsearch #kibana在elasticsearch启动之后再启动
     environment:
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200 #设置访问elasticsearch的地址
       I18N_LOCALE: zh-CN
     ports:

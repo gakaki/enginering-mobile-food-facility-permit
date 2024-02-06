@@ -5,8 +5,11 @@
 "registry-mirrors": ["https://xi1udf2u.mirror.aliyuncs.com"]
 }
 ###
-docker-compose up -d
+docker-compose up -d elasticsearch kibana
 
+Kibana server is not ready yet
+等1分钟
+http://localhost:5601/app/home#/
 
 ## GitHub Action for GraalVM and Maven Dependencies Cache
 
