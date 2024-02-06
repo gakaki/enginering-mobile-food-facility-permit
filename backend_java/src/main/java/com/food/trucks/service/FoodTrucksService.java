@@ -6,6 +6,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.food.trucks.entitiy.FoodTruckEntity;
+import com.food.trucks.repository.FoddTruckElasticSearchRepo;
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.Index;
@@ -40,6 +41,8 @@ public class FoodTrucksService {
     private WebClient webClient;
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private FoddTruckElasticSearchRepo repoEs;
 
 
     private static final String DBKEY = "foodTrucks";
@@ -67,6 +70,7 @@ public class FoodTrucksService {
             items = fetchCSVToEntitiy();
             toRedis(items);
             toMeiliSearch(items);
+            repoEs.addAll(items);
         }
         return items;
     }
